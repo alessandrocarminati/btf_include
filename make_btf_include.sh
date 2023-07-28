@@ -7,12 +7,12 @@ declare -A visited
 queue=()
 
 extract_structure() {
-#	echo "visiting  --$1--" >&2
+#	echo "visiting  --$1-- ${#queue[@]}" >&2
 	pahole vmlinux |  grep -zoP "${1}\s*\{(?:[^{}]+|\{[^{}]*\})*\}" | sed 's/\x0/;\n/g'
 }
 
 is_struct_item() {
-	echo "${1}" | grep -qP "^[ \t]+struct[ \t]+[^\t ]+[ \t]+[^\t ]+[ \t]*;"
+	echo "${1}" | grep -qP "^[ \t]+(struct|union)[ \t]+[^\t ]+[ \t]+[^\t ]+[ \t]*;"
 }
 
 is_already_used() {
@@ -20,7 +20,7 @@ is_already_used() {
 }
 
 string2visit() {
-	echo "$1" | sed -r "s/^[ \t]+(struct[ \t]+[^ ]+).*;.*/\1/"
+	echo "$1" | sed -r "s/^[ \t]+((struct|union)[ \t]+[^ ]+).*;.*/\1/"
 }
 
 visit_structure() {
@@ -33,11 +33,8 @@ visit_structure() {
 		fi
 }
 
-
-
-
 [ $# -ne 1 ] && exit 1
-STRUCT_REGEX="^[ \t]+struct[ \t]+[^\t ]+[ \t]+[^\t ]+[ \t]*;"
+STRUCT_REGEX="^[ \t]+(struct|union)[ \t]+[^\t ]+[ \t]+[^\t ]+[ \t]*;"
 
 IFS=`printf '\n'`
 for i in `grep "BTF_INCLUDE" $1`; do
@@ -46,13 +43,12 @@ for i in `grep "BTF_INCLUDE" $1`; do
 	visit_structure $TO_EXTRACT;
 	done
 
+echo "Explaration finished, producing header" >&2
 echo "//${#queue[@]} imported from BTF"
-#echo ${queue}
 while ! [ ${#queue[@]} -eq 0 ]; do
-#	item=$(dequeue)
-	item=${queue[0]}
-	queue=("${queue[@]:1}")
-#	echo "Processing item: $item"
-#	echo "currently have ${#queue[@]} items"
+	top=${#queue[@]}
+	top=$((top - 1))
+	item="${queue[$top]}"
+	unset "queue[$top]"
 	extract_structure $item
 done
