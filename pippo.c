@@ -8,7 +8,7 @@
 MODULE_LICENSE("GPL");
 MODULE_DESCRIPTION("Pippo");
 
-static int __init hello_init(void)
+static int __init pippo_init(void)
 {
 	struct xattr_ctx pippo; //BTF_INCLUDE
 
@@ -19,10 +19,10 @@ static int __init hello_init(void)
 	return 0;
 }
 
-static void __exit hello_exit(void)
+static void __exit pippo_exit(void)
 {
 	printk(KERN_INFO "Unloading Pippo\n");
 }
 
-module_init(hello_init);
-module_exit(hello_exit);
+module_init(pippo_init);
+module_exit(pippo_exit);

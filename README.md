@@ -23,6 +23,26 @@ can import and use the struct without having the structure declaration and
 importing it directly from the kernel image. 
 The process involves:
 
+```mermaid
+stateDiagram
+
+    state "Search structure to define" as s1
+    state "Collect all structures and union from Linux headers" as s2
+    state "Extract vmlinux from bootable image" as s3
+    state "Extract interesting structure from BTF" as s4
+    state "Filter BTF extracted strucures with already existing" as s5
+    state "Produce file h with needed structures and unions" as s6
+    state "Build kernel module" as s7
+    [*] --> s1
+    s1 --> s2
+    s2 --> s3
+    s3 --> s4
+    s4 --> s5
+    s5 --> s6
+    s6 --> s7
+    s7 --> [*]
+```
+
 1. Customied Makefile that runs scripts that prepare the environment
 2. Module sourcecode that marks with `//BTF_INCLUDE` the structures that 
    are needed to be imported 
